@@ -1,0 +1,40 @@
+type ChangeRecord = record { change_type : text; timestamp : nat64 };
+type Error = variant { NotFound : record { msg : text } };
+type House = record {
+  id : nat64;
+  updated_at : opt nat64;
+  availabile_units : nat64;
+  created_at : nat64;
+  availability : bool;
+  price : nat64;
+  house_type : text;
+  location : text;
+  owners_name : text;
+};
+type HousePayload = record {
+  availabile_units : nat64;
+  availability : bool;
+  price : nat64;
+  house_type : text;
+  location : text;
+  owners_name : text;
+};
+type Result = variant { Ok : House; Err : Error };
+type Result_1 = variant { Ok : bool; Err : Error };
+service : {
+  add_house : (HousePayload) -> (opt House);
+  buy_house : (nat64, HousePayload) -> (Result);
+  delete_house : (nat64) -> (Result);
+  get_all_houses : () -> (vec House) query;
+  get_available_houses : () -> (vec House) query;
+  get_house : (nat64) -> (Result) query;
+  get_house_update_history : (nat64) -> (vec ChangeRecord) query;
+  house_availability : (nat64) -> (Result_1) query;
+  search_houses : (text) -> (vec House) query;
+  search_price : (nat64) -> (vec House) query;
+  set_house_availabile : (nat64) -> (Result);
+  set_house_not_availabile : (nat64) -> (Result);
+  set_price : (nat64, nat64) -> (Result);
+  sort_house_by_name : () -> (vec House) query;
+  update_house : (nat64, HousePayload) -> (Result);
+}
