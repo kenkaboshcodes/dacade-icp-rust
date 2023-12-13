@@ -66,8 +66,6 @@ thread_local! {
         ));
 }
 
-
-
 #[ic_cdk::query]
 fn get_house(id: u64) -> Result<House, Error> {
     match _get_house(&id) {
@@ -113,7 +111,6 @@ fn search_houses(query: String) -> Vec<House> {
     })
 }
 
-
 #[ic_cdk::query]
 fn search_price(query: u64) -> Vec<House> {
     STORAGE_HOUSE.with(|service| {
@@ -125,7 +122,6 @@ fn search_price(query: u64) -> Vec<House> {
             .collect()
     })
 }
-
 
 #[ic_cdk::update]
 fn add_house(house: HousePayload) -> Option<House> {
@@ -162,11 +158,11 @@ fn update_house(id: u64, payload: HousePayload) -> Result<House, Error> {
             house.price = payload.price;
             house.availability = payload.availability;
             do_insert_house(&house);
-            Ok(house)
+            Ok(house.clone())
         }
         None => Err(Error::NotFound {
             msg: format!(
-                "couldn't update an house with id={}. house not found",
+                "couldn't update a house with id={}. house not found",
                 id
             ),
         }),
@@ -185,8 +181,7 @@ fn buy_house(id: u64, payload: HousePayload) -> Result<House, Error> {
             house.price = payload.price;
             house.availability = payload.availability; 
             do_insert_house(&house);
-            Ok(house)
-            
+            Ok(house.clone())
         }
         None => Err(Error::NotFound {
             msg: format!(
@@ -221,7 +216,7 @@ fn house_availability(id: u64) -> Result<bool, Error> {
 }
 
 #[ic_cdk::update]
-fn set_house_availabile(id: u64) -> Result<House, Error> {
+fn set_house_available(id: u64) -> Result<House, Error> {
     match STORAGE_HOUSE.with(|service| service.borrow_mut().get(&id)) {
         Some(mut house) => {
             house.availability = true;
@@ -234,12 +229,8 @@ fn set_house_availabile(id: u64) -> Result<House, Error> {
     }
 }
 
-
-
-
-
 #[ic_cdk::update]
-fn set_house_not_availabile(id: u64) -> Result<House, Error> {
+fn set_house_not_available(id: u64) -> Result<House, Error> {
     if let Some(mut house) = STORAGE_HOUSE.with(|service| service.borrow_mut().get(&id)) {
         house.availability = false;
         do_insert_house(&house);
@@ -250,7 +241,6 @@ fn set_house_not_availabile(id: u64) -> Result<House, Error> {
         })
     }
 }
-
 
 #[ic_cdk::update]
 fn set_price(id: u64, price: u64) -> Result<House, Error> {
@@ -266,13 +256,9 @@ fn set_price(id: u64, price: u64) -> Result<House, Error> {
     }
 }
 
-
-
 fn do_insert_house(house: &House) {
     STORAGE_HOUSE.with(|service| service.borrow_mut().insert(house.id, house.clone()));
 }
-
-
 
 #[derive(candid::CandidType, Deserialize, Serialize)]
 enum Error {
@@ -291,7 +277,6 @@ struct ChangeRecord {
     timestamp: u64,
     change_type: String,
 }
-
 
 #[ic_cdk::query]
 fn sort_house_by_name() -> Vec<House> {
@@ -327,6 +312,5 @@ fn get_house_update_history(id: u64) -> Vec<ChangeRecord> {
         None => Vec::new(),
     }
 }
-
 
 ic_cdk::export_candid!();
